@@ -108,16 +108,34 @@ router.post("/login", async function (req, res) {
   req.session.user = { id: existingUser._id, email: existingUser.email };
   req.session.isAuthenticated = true;
   req.session.save(function () {
-    res.redirect("/admin");
+    res.redirect("/profile");
   }); // forcing the save, since the automatic save is asynchronous and when redirecting to a protected page, the redirection may be executed first
 });
 
-router.get("/admin", function (req, res) {
+router.get("/admin", async function (req, res) {
   if (!req.session.isAuthenticated) {
     // if (!req.session.user)
     return res.status(401).render("401");
   }
+
+  const user = await db
+    .getDb()
+    .collection("users")
+    .findOne({ _id: req.session.user.id });
+
+  if (!user || !user.isAdmin) {
+    return res.status(403).render("403");
+  }
+
   res.render("admin");
+});
+
+router.get("/profile", function (req, res) {
+  if (!req.session.isAuthenticated) {
+    // if (!req.session.user)
+    return res.status(401).render("401");
+  }
+  res.render("profile");
 });
 
 router.post("/logout", function (req, res) {
