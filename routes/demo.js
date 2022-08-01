@@ -151,17 +151,12 @@ router.post("/login", async function (req, res) {
 });
 
 router.get("/admin", async function (req, res) {
-  if (!req.session.isAuthenticated) {
+  if (!res.locals.isAuth) {
     // if (!req.session.user)
     return res.status(401).render("401");
   }
 
-  const user = await db
-    .getDb()
-    .collection("users")
-    .findOne({ _id: req.session.user.id });
-
-  if (!user || !user.isAdmin) {
+  if (!res.locals.isAdmin) {
     return res.status(403).render("403");
   }
 
@@ -169,7 +164,7 @@ router.get("/admin", async function (req, res) {
 });
 
 router.get("/profile", function (req, res) {
-  if (!req.session.isAuthenticated) {
+  if (!res.locals.isAuth) {
     // if (!req.session.user)
     return res.status(401).render("401");
   }
